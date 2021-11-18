@@ -1,16 +1,15 @@
-package jlox;
-
+package com.craftinginterpreters.jlox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static TokenType.*;
+import static com.craftinginterpreters.jlox.TokenType.*;
 
 class Scanner {
     private final String source;
-    private final List<Tiken> tokens = new ArrayList<>();
+    private final List<Token> tokens = new ArrayList<>();
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -47,7 +46,7 @@ class Scanner {
 	    scanToken();
 	}
 
-	token.add(new Token(EOF, "", null, line));
+	tokens.add(new Token(EOF, "", null, line));
 	return tokens;
     }
     
@@ -74,7 +73,7 @@ class Scanner {
 	    addToken(match('=') ? GREATER_EQUAL : GREATER); break;
 	case '/':
 	    if (match('/')) {
-		while (peak() != '\n' && !isAtEnd()) advance();
+		while (peek() != '\n' && !isAtEnd()) advance();
 	    } else {
 		addToken(SLASH);
 	    }                                               break;
@@ -86,14 +85,14 @@ class Scanner {
 	case '\n':
 	    line ++;                                        break;
 	case '"':
-	    string(); break;
+	    string();                                       break;
 	default:
 	    if (isDigit(c)) {
 		number();
 	    } else if (isAlpha(c)) {
 		identifier();
 	    } else {
-		lox.error(line, "Unexpected character.");
+		Lox.error(line, "Unexpected character.");
 	    }                                               break;
 	}
     }
@@ -122,12 +121,12 @@ class Scanner {
     }
     
     private void string() {
-       while (peak() != '"' && !isAtEnd()) {
-	   if (peak() == '\n') line ++;
+       while (peek() != '"' && !isAtEnd()) {
+	   if (peek() == '\n') line ++;
 	   advance();
        }
 
-       if (isAtend()) {
+       if (isAtEnd()) {
 	   Lox.error(line, "Unterminated string.");
 	   return;
        }
@@ -167,7 +166,7 @@ class Scanner {
 	return isAlpha(c) || isDigit(c);
     }
     
-    private boolean isDigit(char) {
+    private boolean isDigit(char c) {
 	return '0' <= c && c <= '9';
     }
     private boolean isAtEnd() {
@@ -178,12 +177,12 @@ class Scanner {
 	return source.charAt(current++);
     }
 
-    private void addToken() {
+    private void addToken(TokenType type) {
 	addToken(type, null);
     }
 
     private void addToken(TokenType type, Object literal) {
 	String text = source.substring(start, current);
-	token.add(new Token(type, text, literal, line));
+	tokens.add(new Token(type, text, literal, line));
     }
 }
