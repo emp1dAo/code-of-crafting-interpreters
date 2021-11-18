@@ -1,4 +1,4 @@
-package jlox;
+package com.craftinginterpreters.jlox;
 
 enum TokenType {
     // Single-charactertokens.
@@ -20,3 +20,4 @@ enum TokenType {
 
     EOF
 }
+
