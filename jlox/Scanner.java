@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static jlox.TokenType.*;
+import static TokenType.*;
 
 class Scanner {
     private final String source;
@@ -50,6 +50,19 @@ class Scanner {
 	    addToken(match('=') ? LESS_EQUAL : LESS);       break;
 	case '>':
 	    addToken(match('=') ? GREATER_EQUAL : GREATER); break;
+	case '/':
+	    if (match('/')) {
+		while (peak() != '\n' && !isAtEnd()) advance();
+	    } else {
+		addToken(SLASH);
+	    }                                               break;
+	case ' ':
+	case '\r':
+	case '\t':
+	    // Ignore whitespace
+	                                                    break;
+	case '\n':
+	    line ++;                                        break;
 	default:
 	    lox.error(line, "Unexpected character.");       break;
 	}
@@ -60,6 +73,11 @@ class Scanner {
 	if (source.charAt(current) != expected) return false;
 	current ++;
 	return true;
+    }
+
+    private char peek() {
+	if (isAtEnd()) return '\0';
+	return source.charAt(current);
     }
     
     private boolean isAtEnd() {
