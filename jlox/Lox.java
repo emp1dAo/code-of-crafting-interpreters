@@ -20,10 +20,13 @@ public class Lox {
 	    runPrompt();
 	}
     }
-
+    
+    // This interpreter supports two ways of running code.
+    // Start jlox from the command line and give it path to file.
     private static void runFile(String path) throws IOException {
 	byte[] bytes = Files.readAllBytes(Paths.get(path));
 	run(new String(bytes, Charset.defaultCharset()));
+	// Indicate an error in the exit code.
 	if (hadError) System.exit(65);
     }
 
@@ -31,15 +34,20 @@ public class Lox {
 	InputStreamReader input = new InputStreamReader(System.in);
 	BufferedReader reader = new BufferedReader(input);
 
+	// interactive loop
 	for (;;) {
 	    System.out.print(">");
+	    // readLine() : reads a line of input from the user on the command line and returns the result.
 	    String line = reader.readLine();
+	    // When readLine() returns null, exit the loop
 	    if (line == null) break;
 	    run(line);
+	    // reset hadErroe, if users make a mistake, it should't kill entire session
 	    hadError = false;
 	}
     }
 
+    // The runPrompt() and the runFile() are wrappered from this core function.
     private static void run(String source) {
 	Scanner scanner = new Scanner(source);
 	List<Token> tokens = scanner.scanTokens();
@@ -48,7 +56,7 @@ public class Lox {
 	    System.out.println(token);
 	}
     }
-
+    // error() and report() helper tells the user some syntax error occurred on a given line.
     static void error(int line, String message) {
 	report(line, "", message);
     }

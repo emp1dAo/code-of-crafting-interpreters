@@ -10,8 +10,13 @@ import static com.craftinginterpreters.jlox.TokenType.*;
 class Scanner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
+    // start and current filds are offsets that index into the string
+    // start points to the first character in the lexeme being scanned.
     private int start = 0;
+    // current points at the character currently being considered.
     private int current = 0;
+    // line field tracks what source line current is on
+    // so we can produce tokens that know their location
     private int line = 1;
     private static final Map<String, TokenType> keywords;
 
@@ -40,29 +45,39 @@ class Scanner {
 	this.source = source;
     }
 
+    // We store the raw source cod as a simple string.
+    // We have a list ready to fill with tokens we're going to generate.
     List<Token> scanTokens() {
+	// Scanner works its way through the source code/
+	// adding tokens until it runs out of characters.
 	while (!isAtEnd()) {
+	    // We are at the beginning of the next lexeme.
 	    start = current;
 	    scanToken();
 	}
-
+	
+	// appends one final "end of file" token.
 	tokens.add(new Token(EOF, "", null, line));
 	return tokens;
     }
-    
+
+    // recognizing lexemes
+    // each turn of the loop, we scan a single token.
     private void scanToken() {
 	char c = advance();
 	switch (c) {
-	case '(': addToken(LEFT_PAREN);    break;
-	case ')': addToken(RIGHT_PAREN);   break;
-	case '{': addToken(LEFT_BRACE);    break;
-	case '}': addToken(RIGHT_BRACE);   break;
-	case ',': addToken(COMMA);         break;
-	case '.': addToken(DOT);           break;
-	case '-': addToken(MINUS);         break;
-	case '+': addToken(PLUS);          break;
-	case ';': addToken(SEMICOLON);     break;
-	case '*': addToken(STAR);          break;
+	case '(': addToken(LEFT_PAREN);                     break;
+	case ')': addToken(RIGHT_PAREN);                    break;
+	case '{': addToken(LEFT_BRACE);                     break;
+	case '}': addToken(RIGHT_BRACE);                    break;
+	case ',': addToken(COMMA);                          break;
+	case '.': addToken(DOT);                            break;
+	case '-': addToken(MINUS);                          break;
+	case '+': addToken(PLUS);                           break;
+	case ';': addToken(SEMICOLON);                      break;
+	case '*': addToken(STAR);                           break;
+	// for operators such as: !=, >=, <=, ==
+	// we need to look at the second character
 	case '!':
 	    addToken(match('=') ? BANG_EQUAL : BANG);       break;
 	case '=':
@@ -71,9 +86,12 @@ class Scanner {
 	    addToken(match('=') ? LESS_EQUAL : LESS);       break;
 	case '>':
 	    addToken(match('=') ? GREATER_EQUAL : GREATER); break;
+	// comment begin with a slash too.
 	case '/':
 	    if (match('/')) {
+		// a comment goes until the end of the line.
 		while (peek() != '\n' && !isAtEnd()) advance();
+		// Comments aren't meaningful, when reach the end of the comment we don't call addToken().
 	    } else {
 		addToken(SLASH);
 	    }                                               break;
@@ -139,6 +157,8 @@ class Scanner {
        addToken(STRING, value);
    }
 
+    // It’s like a conditional advance().
+    // We only consume the current character if it’s what we’re looking for.
     private boolean match(char expected) {
 	if (isAtEnd()) return false;
 	if (source.charAt(current) != expected) return false;
@@ -146,6 +166,9 @@ class Scanner {
 	return true;
     }
 
+    // lookahead
+    // It's sort of like advance(), but doesn't consume the character.
+    // It only looks at the current unconsumed character.
     private char peek() {
 	if (isAtEnd()) return '\0';
 	return source.charAt(current);
@@ -169,18 +192,24 @@ class Scanner {
     private boolean isDigit(char c) {
 	return '0' <= c && c <= '9';
     }
+
+    // isAtEnd() tells us if we're consumed all the characters.
     private boolean isAtEnd() {
 	return current >= source.length();
     }
 
+    // advance() is for "input"
+    // advance() consumes the next character in the source file and returns it
     private char advance() {
 	return source.charAt(current++);
     }
 
+    // addToken() is for "output"
+    // addToken() grabs the text of the current lexeme and creats a new token for it.
     private void addToken(TokenType type) {
 	addToken(type, null);
     }
-
+    
     private void addToken(TokenType type, Object literal) {
 	String text = source.substring(start, current);
 	tokens.add(new Token(type, text, literal, line));
