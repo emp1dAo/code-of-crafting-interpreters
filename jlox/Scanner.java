@@ -102,6 +102,7 @@ class Scanner {
 	                                                    break;
 	case '\n':
 	    line ++;                                        break;
+	// Tackle literals
 	case '"':
 	    string();                                       break;
 	default:
@@ -118,8 +119,11 @@ class Scanner {
     private void identifier() {
 	while (isAlphaNumeric(peek())) advance();
 
+	// After scan an identifier, check to see if it matches anything in map.
 	String text = source.substring(start, current);
 	TokenType type = keywords.get(text);
+	// If so, we use that keyword’s token type.
+	// Otherwise, it’s a regular user-defined identifier.
 	if (type == null) type = IDENTIFIER;
 	addToken(IDENTIFIER);
     }
