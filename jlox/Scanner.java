@@ -92,6 +92,8 @@ class Scanner {
 		// a comment goes until the end of the line.
 		while (peek() != '\n' && !isAtEnd()) advance();
 		// Comments aren't meaningful, when reach the end of the comment we don't call addToken().
+	    } else if (match('*')) {
+		blockComment();
 	    } else {
 		addToken(SLASH);
 	    }                                               break;
@@ -217,5 +219,33 @@ class Scanner {
     private void addToken(TokenType type, Object literal) {
 	String text = source.substring(start, current);
 	tokens.add(new Token(type, text, literal, line));
+    }
+
+    // handle '/* ... */'
+    private void blockComment() {
+	while (peek() != '*' && !isAtEnd()) {
+	    // when encounter '\n', need to add line
+	    if (peek() == '\n') ++line;
+	    // handle '*/'
+	    if (peek() == '/') {
+		if (peekNext() == '*') {
+		    advance();
+		    advance();
+		    blockComment();
+		}
+	    }
+	    advance();
+	}
+	
+	if (isAtEnd()) {
+	    Lox.error(line, "Unterminated block comment");
+	}
+
+	advance();
+
+	if (!match('/')) {
+	    advance();
+	    blockComment();
+	}
     }
 }
