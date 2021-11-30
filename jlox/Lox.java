@@ -49,12 +49,15 @@ public class Lox {
 
     // The runPrompt() and the runFile() are wrappered from this core function.
     private static void run(String source) {
-	Scanner scanner = new Scanner(source);
+    Scanner scanner = new Scanner(source);
 	List<Token> tokens = scanner.scanTokens();
+	Parser parser = new Parser(tokens);
+	Expr expression = parser.parser();
 
-	for (Token token : tokens) {
-	    System.out.println(token);
-	}
+	// Stop if ther was syntax error/
+	if (hadError) return;
+
+	System.out.println(new AstPrinter().print(expression));
     }
     // error() and report() helper tells the user some syntax error occurred on a given line.
     static void error(int line, String message) {
@@ -65,5 +68,13 @@ public class Lox {
 			       String message) {
 	System.err.println("[line " + line + "] error" + where + ": " + message);
 	hadError = true;
+    }
+
+    static void error(Token token, String message) {
+        if (token.type == TokenType.EOF) {
+            report(token.line, " at end", message);
+        } else {
+            report(token.line, " at '" + token.lexeme + "'", message);
+        }
     }
 }
