@@ -26,7 +26,7 @@ class Parser {
         return equality();
     }
 
-    private Expr equlity() {
+    private Expr equality() {
         Expr expr = comparsion();
         while (match(BANG_EQUAL, EQUAL_EQUAL)) {
             Token operator = previous();
@@ -50,7 +50,7 @@ class Parser {
     private Token consume(TokenType type, String message) {
         if (check(type)) return advance();
 
-        throw error(peek(), message)
+        throw error(peek(), message);
     }
 
     private Expr comparsion() {
@@ -81,7 +81,7 @@ class Parser {
         Expr expr = unary();
 
         while (match(SLASH, STAR)) {
-            Token opearator = previous();
+            Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -108,17 +108,17 @@ class Parser {
             return new Expr.Literal(previous().literal);
         }
 
-        if (match(LET_PAREN)) {
+        if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
 
-        throw error(peek(), "Expect expression.")
+        throw error(peek(), "Expect expression.");
     }
     
     private boolean check(TokenType type) {
-        if (isAtend()) return false;
+        if (isAtEnd()) return false;
         return peek().type == type;
     }
 
@@ -151,7 +151,7 @@ class Parser {
             if (previous().type == SEMICOLON) return;
 
             switch (peek().type) {
-                case ClASS:
+                case CLASS:
                 case FUN:
                 case VAR:
                 case FOR:
