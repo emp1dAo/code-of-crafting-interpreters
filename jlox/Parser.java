@@ -1,6 +1,6 @@
 package com.craftinginterpreters.jlox;
 
-import java.util.ArrayList
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.craftinginterpreters.jlox.TokenType.*;

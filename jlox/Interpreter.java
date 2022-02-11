@@ -1,11 +1,16 @@
 package com.craftinginterpreters.jlox;
 
-class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
 
-    void interpret(Expr expression) {
+class Interpreter implements Expr.Visitor<Object>,
+			     Stmt.Visitor<Void> {
+    void interpret(List<Stmt> statements) {
 	try {
-	    Object value = evaluate(expression);
-	    System.out.println(stringify(value));
+	    for (Stmt statement : statements) {
+		execute(statement);
+	    }
+	    // Object value = evaluate(expression);
+	    // System.out.println(stringify(value));
 	} catch (RuntimeError error) {
 	    Lox.runtimeError(error);
 	}
@@ -27,6 +32,26 @@ class Interpreter implements Expr.Visitor<Object> {
 	return expr.accept(this);
     }
 
+    private void execute(Stmt stmt) {
+	stmt.accept(this);
+    }
+
+    // expression statements
+    // We evaluate the inner expression using our evaluate(), discard the value
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+	evaluate(stmt.expression);
+	return null;
+    }
+
+    // print statement
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+	Object value = evaluate(stmt.expression);
+	System.out.println(stringify(value));
+	return null;
+    }
+    
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
 	Object left = evaluate(expr.left);
