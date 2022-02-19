@@ -20,7 +20,9 @@ class Parser {
     }
 
     private Stmt statement() {
-	if (match(PRINT)) return printStatement();
+	if (match(PRINT)){
+	    return printStatement();
+	}			    
 	return expressionStatement();
     }
 
@@ -58,7 +60,7 @@ class Parser {
     }
 
     private boolean match(TokenType... types) {
-        for (TokenType type : types) {
+        for (TokenType type : types) {	 
             if (check(type)) {
                 advance();
                 return true;
@@ -135,6 +137,7 @@ class Parser {
         }
 
         throw error(peek(), "Expect expression.");
+	
     }
     
     private boolean check(TokenType type) {

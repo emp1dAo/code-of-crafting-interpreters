@@ -127,7 +127,7 @@ class Scanner {
 	// If so, we use that keyword’s token type.
 	// Otherwise, it’s a regular user-defined identifier.
 	if (type == null) type = IDENTIFIER;
-	addToken(IDENTIFIER);
+	addToken(type);
     }
 
     private void number() {
