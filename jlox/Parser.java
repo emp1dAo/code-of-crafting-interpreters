@@ -44,9 +44,29 @@ class Parser {
     private Stmt statement() {
 	if (match(PRINT)) return printStatement();
        	if (match(LEFT_BRACE)) return new Stmt.Block(block());
+	if (match(IF)) return ifStatement();
 	return expressionStatement();
     }
 
+    /*
+        No matter what hack they use to get themselves out of the trouble, they always choose the same interpretation—the else is bound to the nearest if that precedes it.
+
+        Our parser conveniently does that already. Since ifStatement() eagerly looks for an else before returning, the innermost call to a nested series will claim the else clause for itself before returning to the outer if statements.
+    */
+    private Stmt ifStatement() {
+	consume(LEFT_PAREN, "Expect '(' after 'if'.");
+	Expr condition = expression();
+	consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+	Stmt thenBranch = statement();
+	Stmt elseBranch = null;
+	if (match(ELSE)) {
+	    elseBranch = statement();
+	}
+
+	return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+    
     private Stmt printStatement() {
 	Expr value = expression();
 	consume(SEMICOLON, "Expect ';' after value.");

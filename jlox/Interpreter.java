@@ -72,6 +72,17 @@ class Interpreter implements Expr.Visitor<Object>,
 	return null;
     }
 
+    // Actually, the interpreter implementation is a thin wrapper around the self-same Java code.
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+	if (isTruthy(evaluate(stmt.condition))) {
+	    execute(stmt.thenBranch);
+	} else if (stmt.elseBranch != null) {
+	    execute(stmt.elseBranch);
+	}
+	return null;
+    }
+
     // print statement
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
