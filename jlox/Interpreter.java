@@ -1,6 +1,7 @@
 package com.craftinginterpreters.jlox;
 
 import java.util.List;
+import java.util.ArrayList;
 
 class Interpreter implements Expr.Visitor<Object>,
 			     Stmt.Visitor<Void> {
@@ -171,11 +172,30 @@ class Interpreter implements Expr.Visitor<Object>,
 	    }
 
 	    throw new RuntimeError(expr.operator,
-				   "Operands must bu two or two strings.");
+				   "Operands must be two or two strings.");
 	}
 
 	// Unreachable.
 	return null;
+    }
+
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+	Object callee = evaluate(expr.callee);
+
+	List<Object> arguments = new ArrayList<>();
+	for (Expr argument : expr.arguments) {
+	    arguments.add(evaluate(argument));
+	}
+
+	// check the type ourselves first
+	if (!(callee instanceof LoxCallable)) {
+	    throw new RuntimeError(expr.paren,
+				   "Can only call fun ctions and classes.");
+	}
+	
+	LoxCallable function = (LoxCallable)callee;
+	return function.call(this, arguments);
     }
 
     @Override
