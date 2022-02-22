@@ -1,6 +1,7 @@
 package com.craftinginterpreters.jlox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.craftinginterpreters.jlox.TokenType.*;
@@ -45,10 +46,62 @@ class Parser {
 	if (match(PRINT)) return printStatement();
 	if (match(WHILE)) return whileStatement();
        	if (match(LEFT_BRACE)) return new Stmt.Block(block());
+	if (match(FOR)) return forStatement();
 	if (match(IF)) return ifStatement();
 	return expressionStatement();
     }
 
+    private Stmt forStatement() {
+	/*
+	    If the token following the ( is a semicolon then the initializer has been omitted. 
+	    Otherwise, we check for a var keyword to see if it’s a variable declaration.
+	    If neither of those matched, it must be an expression. 
+	 */
+	consume(LEFT_PAREN, "Expect '(' after 'for' .");
+	Stmt initializer;
+	if (match(SEMICOLON)) {
+	    initializer = null;
+	} else if (match(VAR)) {
+	    initializer = varDeclaration();
+	} else {
+	    initializer = expressionStatement();
+	}
+
+	/*
+	  We look for a semicolon to see if the clause has been omitted.
+	 */
+	Expr condition = null;
+	if (!check(SEMICOLON)) {
+	    condition = expression();
+	}
+	consume(SEMICOLON, "Expect ';' after loop condition.");
+
+	// increment expression
+	Expr increment = null;
+	if (!check(RIGHT_PAREN)) {
+	    increment = expression();
+	}
+	consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+	// loop body
+	Stmt body = statement();
+	if (increment != null) {
+	    body = new Stmt.Block(
+		 Arrays.asList(body,
+			       new Stmt.Expression(increment)));
+	}
+
+	// If the condition is omitted, we jam in true to make an infinite loop.
+	if (condition == null) condition = new Expr.Literal(true);
+	body = new Stmt.While(condition, body);
+
+	// If there is an initializer, it runs once before the entire loop.
+	if (initializer != null) {
+	    body = new Stmt.Block(Arrays.asList(initializer, body));
+	}
+	return body;
+    }
+    
     /*
         No matter what hack they use to get themselves out of the trouble, they always choose the same interpretation—the else is bound to the nearest if that precedes it.
 
