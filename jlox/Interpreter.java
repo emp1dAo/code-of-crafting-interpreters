@@ -23,7 +23,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
 		@Override
 		public String toString() { return "<native fn>"; }
-	    })
+	    });
     }
     
     void interpret(List<Stmt> statements) {
@@ -106,6 +106,13 @@ class Interpreter implements Expr.Visitor<Object>,
 	return null;
     }
 
+    @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+	LoxFunction function = new LoxFunction(stmt);
+	environment.define(stmt.name.lexeme, function);
+	return null;
+    }
+
     // Actually, the interpreter implementation is a thin wrapper around the self-same Java code.
     @Override
     public Void visitIfStmt(Stmt.If stmt) {
@@ -182,7 +189,6 @@ class Interpreter implements Expr.Visitor<Object>,
 	    checkNumberOperands(expr.operator, left, right);
 	    return (double)left * (double)right;
 	case PLUS:
-	    checkNumberOperands(expr.operator, left, right);
 	    if (left instanceof Double && right instanceof Double) {
 		return (double)left + (double)right;
 	    }

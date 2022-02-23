@@ -1,4 +1,4 @@
-package com.craftinginterpreters.jlxo;
+package com.craftinginterpreters.jlox;
 
 import java.util.List;
 
