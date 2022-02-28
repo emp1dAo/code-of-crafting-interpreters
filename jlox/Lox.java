@@ -60,6 +60,10 @@ public class Lox {
 
 	// Stop if ther was syntax error/
 	if (hadError) return;
+	Resolver resolver = new Resolver(interpreter);
+	resolver.resolve(statements);
+	// Stop if there was a resolution error.
+	if (hadError) return;
 	interpreter.interpret(statements);
     }
     // error() and report() helper tells the user some syntax error occurred on a given line.
