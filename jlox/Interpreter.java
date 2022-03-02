@@ -73,6 +73,11 @@ class Interpreter implements Expr.Visitor<Object>,
 	return value;
     }
 
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+	return lookUpVariable(expr.keyword, expr);
+    }
+
     // node explicit parentheses in an expression
     @Override
     public Object visitGroupingExpr(Expr.Grouping expr) {
