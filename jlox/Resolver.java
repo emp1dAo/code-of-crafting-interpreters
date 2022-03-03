@@ -52,6 +52,17 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	if (stmt.superclass != null) {
 	    resolve(stmt.superclass);
 	}
+	
+	/* If the class declaration has superclass,
+	   then we create a new scope surrounding all of its methods.
+	   In that scope, we define the name "super". 
+
+	   Once we're done resolving the class's methods, we discard that scope.
+	*/
+	if (stmt.superclass != null) {
+	    beginScope();
+	    scopes.peek().put("super", true);
+	}
 	beginScope();
 	scopes.peek().put("this", true);
 	for (Stmt.Function method : stmt.methods) {
@@ -62,6 +73,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	    resolveFunction(method, declaration);
 	}
 	endScope();
+	if (stmt.superclass != null) endScope();
 	currentClass = enclosingClass;
 	return null;
     }
@@ -180,6 +192,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitSetExpr(Expr.Set expr) {
 	resolve(expr.value);
 	resolve(expr.object);
+	return null;
+    }
+
+    @Override
+    public Void visitSuperExpr(Expr.Super expr) {
+	resolveLocal(expr, expr.keyword);
 	return null;
     }
 
